@@ -1,0 +1,1 @@
+ALTER TABLE `zetyx_member_table` DROP `bar` , DROP `bell` , DROP `bellbonus` , DROP `allseven` , DROP `allitemh` , DROP `alliteml` , DROP `crossseven` , DROP `rankpoint` , DROP `box1` , DROP `box2` ,	DROP `box3` , DROP `box4` , DROP `box5` , DROP `box6` ,	DROP `box7` , DROP `box8` , DROP `box9` , DROP `gamepoint` ;
