@@ -28,14 +28,14 @@ $cro7=0;
 $sdata = slot_db_one('SELECT * FROM zetyx_member_table WHERE user_id = :user_id LIMIT 1', [':user_id' => $slot_user_id]);
 if ($sdata === null) { slot_fail_database(); }
 
-if($member[no]&&$sdata[bar]>0) // 디비에 남은 바 서비스가 존재할 경우
+if($member['no']&&$sdata['bar']>0) // 디비에 남은 바 서비스가 존재할 경우
 {
 	include "bar.php";
 	$mode=1;
 	$slotclr="#CCF6FD";
 	echo "<script>top.setBetFalse();</script>";
 }
-else if($member[no]&&$sdata[bellbonus]>0) // 디비에 남은 종 서비스가 존재할 경우
+else if($member['no']&&$sdata['bellbonus']>0) // 디비에 남은 종 서비스가 존재할 경우
 {
 	include "bell.php";
 	$mode=2;
@@ -64,7 +64,7 @@ $img[7]="images/spin".$num[7].".gif";
 $img[8]="images/spin".$num[8].".gif";
 $img[9]="images/spin".$num[9].".gif";
 
-if($member[no]&&$sdata[gamepoint]>=$betmoney&&$betmoney>=20) {
+if($member['no']&&$sdata['gamepoint']>=$betmoney&&$betmoney>=20) {
 $debit_count = slot_db_exec(
     'UPDATE zetyx_member_table SET gamepoint = gamepoint - :betmoney
       WHERE user_id = :user_id AND gamepoint >= :minimum',
@@ -79,21 +79,21 @@ if($holds>0)
 {
 	if($h1)
 	{
-		$num[1]=$sdata[box1];	$img[1]="images/stop".$num[1].".gif";
-		$num[4]=$sdata[box4];	$img[4]="images/stop".$num[4].".gif";
-		$num[7]=$sdata[box7];	$img[7]="images/stop".$num[7].".gif";
+		$num[1]=$sdata['box1'];	$img[1]="images/stop".$num[1].".gif";
+		$num[4]=$sdata['box4'];	$img[4]="images/stop".$num[4].".gif";
+		$num[7]=$sdata['box7'];	$img[7]="images/stop".$num[7].".gif";
 	}
 	if($h2)
 	{
-		$num[2]=$sdata[box2];	$img[2]="images/stop".$num[2].".gif";
-		$num[5]=$sdata[box5];	$img[5]="images/stop".$num[5].".gif";
-		$num[8]=$sdata[box8];	$img[8]="images/stop".$num[8].".gif";
+		$num[2]=$sdata['box2'];	$img[2]="images/stop".$num[2].".gif";
+		$num[5]=$sdata['box5'];	$img[5]="images/stop".$num[5].".gif";
+		$num[8]=$sdata['box8'];	$img[8]="images/stop".$num[8].".gif";
 	}
 	if($h3)
 	{
-		$num[3]=$sdata[box3];	$img[3]="images/stop".$num[3].".gif";
-		$num[6]=$sdata[box6];	$img[6]="images/stop".$num[6].".gif";
-		$num[9]=$sdata[box9];	$img[9]="images/stop".$num[9].".gif";
+		$num[3]=$sdata['box3'];	$img[3]="images/stop".$num[3].".gif";
+		$num[6]=$sdata['box6'];	$img[6]="images/stop".$num[6].".gif";
+		$num[9]=$sdata['box9'];	$img[9]="images/stop".$num[9].".gif";
 	}
 	$allmode=100;
 }
@@ -418,17 +418,17 @@ for($i=1;$i<10;$i++)
 }
 
 // 게임머니 표시
-echo "<script>top.document.getElementById('moneytxt').value='".number_format($sdata[gamepoint])."';</script>";
+echo "<script>top.document.getElementById('moneytxt').value='".number_format($sdata['gamepoint'])."';</script>";
 
 // 잭팟 표시
 echo "<script>top.document.getElementById('jackpottxt').value='$ ".number_format($jackpot)."';</script>";
 
 // 슈퍼종 표시
-echo "<script>top.document.getElementById('belltxt').value='".$sdata[bell]."';</script>";
+echo "<script>top.document.getElementById('belltxt').value='".$sdata['bell']."';</script>";
 
 // 서비스 표시
-if($mode==1) echo "<script>top.document.getElementById('servicetxt').value='".$sdata[bar]."';</script>";
-else if($mode==2) echo "<script>top.document.getElementById('servicetxt').value='".$sdata[bellbonus]."';</script>";
+if($mode==1) echo "<script>top.document.getElementById('servicetxt').value='".$sdata['bar']."';</script>";
+else if($mode==2) echo "<script>top.document.getElementById('servicetxt').value='".$sdata['bellbonus']."';</script>";
 else if($mode==0) echo "<script>top.document.getElementById('servicetxt').value='0';</script>";
 		
 
@@ -722,7 +722,7 @@ if($seven>=5)
 
 if($bells>0)
 {
-	if($sdata[bell]<=$bells)
+	if($sdata['bell']<=$bells)
 	{
 	 slot_db_exec('UPDATE zetyx_member_table SET bellbonus = bellbonus + 5 WHERE user_id = :user_id', [':user_id' => $slot_user_id]);
 	 slot_db_exec('UPDATE zetyx_member_table SET bell = bell - :bells_sub + 5 WHERE user_id = :user_id AND bell >= :bells_min', [':bells_sub' => $bells, ':user_id' => $slot_user_id, ':bells_min' => $bells]);
@@ -743,22 +743,22 @@ switch($rankdb)
 {
 	case 1:
 		slot_db_exec('UPDATE zetyx_member_table SET allseven = allseven + 1, rankpoint = rankpoint + 5 WHERE user_id = :user_id', [':user_id' => $slot_user_id]);
-		echo "<script>top.setRecord(".($sdata[allseven]+1).",".$sdata[allitemh].",".$sdata[alliteml].",".$sdata[crossseven].");</script>";
+		echo "<script>top.setRecord(".($sdata['allseven']+1).",".$sdata['allitemh'].",".$sdata['alliteml'].",".$sdata['crossseven'].");</script>";
 		$all7=1;
 		break;
 	case 2:
 		slot_db_exec('UPDATE zetyx_member_table SET allitemh = allitemh + 1, rankpoint = rankpoint + 3 WHERE user_id = :user_id', [':user_id' => $slot_user_id]);
-		echo "<script>top.setRecord(".$sdata[allseven].",".($sdata[allitemh]+1).",".$sdata[alliteml].",".$sdata[crossseven].");</script>";
+		echo "<script>top.setRecord(".$sdata['allseven'].",".($sdata['allitemh']+1).",".$sdata['alliteml'].",".$sdata['crossseven'].");</script>";
 		$allh=1;
 		break;
 	case 3:
 		slot_db_exec('UPDATE zetyx_member_table SET alliteml = alliteml + 1, rankpoint = rankpoint + 1 WHERE user_id = :user_id', [':user_id' => $slot_user_id]);
-		echo "<script>top.setRecord(".$sdata[allseven].",".$sdata[allitemh].",".($sdata[alliteml]+1).",".$sdata[crossseven].");</script>";
+		echo "<script>top.setRecord(".$sdata['allseven'].",".$sdata['allitemh'].",".($sdata['alliteml']+1).",".$sdata['crossseven'].");</script>";
 		$alll=1;
 		break;
 	case 4:
 		slot_db_exec('UPDATE zetyx_member_table SET crossseven = crossseven + 1, rankpoint = rankpoint + 1 WHERE user_id = :user_id', [':user_id' => $slot_user_id]);
-		echo "<script>top.setRecord(".$sdata[allseven].",".$sdata[allitemh].",".$sdata[alliteml].",".($sdata[crossseven]+1).");</script>";
+		echo "<script>top.setRecord(".$sdata['allseven'].",".$sdata['allitemh'].",".$sdata['alliteml'].",".($sdata['crossseven']+1).");</script>";
 		$cro7=1;
 		break;
 	default :
@@ -775,7 +775,7 @@ else
 {
 	$total_points=$total_points*$doublepoint;
 	echo "<script>gamemsg='".$gamemsg."'+' ".$total_points." P';</script>";
-	$gamemsg=$gamemsg+" "+$total_points;
+	$gamemsg = $gamemsg . " " . $total_points;
 }	
 
 slot_db_exec(

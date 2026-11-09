@@ -487,7 +487,7 @@ function set_screen()
                                 Seven</b></span></font></p>
                             </td>
                             <td width="72" align="center" valign="middle" style="border-top-width:1; border-right-width:1; border-bottom-width:1; border-left-width:1; border-top-color:rgb(216,216,216); border-right-color:rgb(216,216,216); border-bottom-color:rgb(255,238,238); border-left-color:rgb(255,238,238); border-style:solid;" height="27" bgcolor="#F9F9F9">
-                                <p align="center"><span style="font-size:10pt;">&nbsp;&nbsp;<input type=text maxlength="4" size="4" name="record_all_seven" style="font-weight:bold; font-size:10pt; color:red; text-align:left; background-color:rgb(249,249,249); border-width:0; border-style:none;" READONLY value="<?=$datadb[allseven]?>"></span>           </td>
+                                <p align="center"><span style="font-size:10pt;">&nbsp;&nbsp;<input type=text maxlength="4" size="4" name="record_all_seven" style="font-weight:bold; font-size:10pt; color:red; text-align:left; background-color:rgb(249,249,249); border-width:0; border-style:none;" READONLY value="<?=$datadb['allseven']?>"></span>           </td>
                         </tr>
                         <tr>
                             <td width="128" align="center" valign="middle" style="border-top-width:1; border-right-width:1; border-bottom-width:1; border-left-width:1; border-top-color:rgb(255,238,238); border-right-color:rgb(255,238,238); border-bottom-color:rgb(255,238,238); border-left-color:rgb(216,216,216); border-style:solid;" height="27" bgcolor="#F9F9F9">
@@ -495,7 +495,7 @@ function set_screen()
                                 same (High)</b></span></font></p>
                             </td>
                             <td width="72" align="center" valign="middle" style="border-top-width:1; border-right-width:1; border-bottom-width:1; border-left-width:1; border-top-color:rgb(255,238,238); border-right-color:rgb(216,216,216); border-bottom-color:rgb(255,238,238); border-left-color:rgb(255,238,238); border-style:solid;" height="27" bgcolor="#F9F9F9">
-                                <p align="center"><span style="font-size:10pt;">&nbsp;&nbsp;<input type=text maxlength="4" size="4" name="record_allitemh" style="font-weight:bold; font-size:10pt; color:red; text-align:left; background-color:rgb(249,249,249); border-width:0; border-style:none;" READONLY value="<?=$datadb[allitemh]?>"></span>                            </td>
+                                <p align="center"><span style="font-size:10pt;">&nbsp;&nbsp;<input type=text maxlength="4" size="4" name="record_allitemh" style="font-weight:bold; font-size:10pt; color:red; text-align:left; background-color:rgb(249,249,249); border-width:0; border-style:none;" READONLY value="<?=$datadb['allitemh']?>"></span>                            </td>
                         </tr>
                         <tr>
                             <td width="128" align="center" valign="middle" style="border-top-width:1; border-right-width:1; border-bottom-width:1; border-left-width:1; border-top-color:rgb(255,238,238); border-right-color:rgb(255,238,238); border-bottom-color:rgb(255,238,238); border-left-color:rgb(216,216,216); border-style:solid;" height="27" bgcolor="#F9F9F9">
@@ -503,7 +503,7 @@ function set_screen()
                                 same (Low)</b></span></font></p>
                             </td>
                             <td width="72" align="center" valign="middle" style="border-top-width:1; border-right-width:1; border-bottom-width:1; border-left-width:1; border-top-color:rgb(255,238,238); border-right-color:rgb(216,216,216); border-bottom-color:rgb(255,238,238); border-left-color:rgb(255,238,238); border-style:solid;" height="27" bgcolor="#F9F9F9">
-                                <p align="center"><span style="font-size:10pt;">&nbsp;&nbsp;<input type=text maxlength="4" size="4" name="record_alliteml" style="font-weight:bold; font-size:10pt; color:red; text-align:left; background-color:rgb(249,249,249); border-width:0; border-style:none;" READONLY value="<?=$datadb[alliteml]?>"></span>                            </td>
+                                <p align="center"><span style="font-size:10pt;">&nbsp;&nbsp;<input type=text maxlength="4" size="4" name="record_alliteml" style="font-weight:bold; font-size:10pt; color:red; text-align:left; background-color:rgb(249,249,249); border-width:0; border-style:none;" READONLY value="<?=$datadb['alliteml']?>"></span>                            </td>
                         </tr>
                         <tr valign="top" align="center">
                             <td width="128" align="center" valign="middle" style="border-top-width:1; border-right-width:1; border-bottom-width:1; border-left-width:1; border-top-color:rgb(255,238,238); border-right-color:rgb(255,238,238); border-bottom-color:rgb(255,238,238); border-left-color:rgb(216,216,216); border-style:solid;" height="27" bgcolor="#F9F9F9">
@@ -511,7 +511,7 @@ function set_screen()
                                 Seven</b></span></font></p>
                             </td>
                             <td width="72" align="center" valign="middle" style="border-top-width:1; border-right-width:1; border-bottom-width:1; border-left-width:1; border-top-color:rgb(255,238,238); border-right-color:rgb(216,216,216); border-bottom-color:rgb(255,238,238); border-left-color:rgb(255,238,238); border-style:solid;" height="27" bgcolor="#F9F9F9">
-                                <p align="center"><span style="font-size:10pt;">&nbsp;&nbsp;<input type=text maxlength="4" size="4" name="record_crossseven" style="font-weight:bold; font-size:10pt; color:red; text-align:left; background-color:rgb(249,249,249); border-width:0; border-style:none;" READONLY value="<?=$datadb[crossseven]?>"></span>                            </td>
+                                <p align="center"><span style="font-size:10pt;">&nbsp;&nbsp;<input type=text maxlength="4" size="4" name="record_crossseven" style="font-weight:bold; font-size:10pt; color:red; text-align:left; background-color:rgb(249,249,249); border-width:0; border-style:none;" READONLY value="<?=$datadb['crossseven']?>"></span>                            </td>
                         </tr>
                         <tr>
                             <td width="128" align="center" valign="middle" style="border-top-width:1; border-right-width:1; border-bottom-width:1; border-left-width:1; border-top-color:rgb(255,238,238); border-right-color:rgb(255,238,238); border-bottom-color:rgb(216,216,216); border-left-color:rgb(216,216,216); border-style:solid;" height="27" bgcolor="#F9F9F9">
@@ -519,7 +519,7 @@ function set_screen()
                                 Points</b></span></font></p>
                             </td>
                             <td width="72" align="center" valign="middle" style="border-top-width:1; border-right-width:1; border-bottom-width:1; border-left-width:1; border-top-color:rgb(255,238,238); border-right-color:rgb(216,216,216); border-bottom-color:rgb(216,216,216); border-left-color:rgb(255,238,238); border-style:solid;" height="27" bgcolor="#F9F9F9">
-                                <p align="center"><span style="font-size:10pt;">&nbsp;&nbsp;<input type=text maxlength="4" size="4" name="record_total" style="font-weight:bold; font-size:10pt; color:red; text-align:left; background-color:rgb(249,249,249); border-width:0; border-style:none;" READONLY value="<?=($datadb[allseven]*5)+($datadb[allitemh]*3)+($datadb[alliteml]+$datadb[crossseven])?>"></span>                            </td>
+                                <p align="center"><span style="font-size:10pt;">&nbsp;&nbsp;<input type=text maxlength="4" size="4" name="record_total" style="font-weight:bold; font-size:10pt; color:red; text-align:left; background-color:rgb(249,249,249); border-width:0; border-style:none;" READONLY value="<?=($datadb['allseven']*5)+($datadb['allitemh']*3)+($datadb['alliteml']+$datadb['crossseven'])?>"></span>                            </td>
                         </tr>
                         <tr valign="top" align="center">
                             <td width="201" align="left" valign="middle" style="border-top-width:1; border-right-width:1; border-bottom-width:1; border-left-width:1; border-color:rgb(216,216,216); border-style:solid;" height="30" colspan="2" bgcolor="#FFF0F0">
