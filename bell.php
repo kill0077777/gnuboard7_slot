@@ -147,5 +147,5 @@ $allbar=0;		/* ¿ÃÀâ¹Ù */
 $bells=0;
 $bellcount=0;
 
-mysql_query("update zetyx_member_table set bellbonus=bellbonus-1 where user_id='$slot_user_id'",$connect) or slot_fail_database();
+slot_db_exec('UPDATE zetyx_member_table SET bellbonus = bellbonus - 1 WHERE user_id = :user_id AND bellbonus > 0', [':user_id' => $slot_user_id]);
 ?>

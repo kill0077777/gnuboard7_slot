@@ -3,10 +3,6 @@ require_once __DIR__ . '/zbpath.php';
 require_once $_zb_path . '_head.php';
 require_once __DIR__ . '/security.php';
 
-if (!isset($connect)) {
-    http_response_code(500);
-    exit('Database connection is unavailable.');
-}
 
 $per_page = 20;
 $page = filter_input(INPUT_GET, 'page', FILTER_VALIDATE_INT, [
@@ -15,15 +11,8 @@ $page = filter_input(INPUT_GET, 'page', FILTER_VALIDATE_INT, [
 $page = max(1, min((int)$page, 100000));
 $offset = ($page - 1) * $per_page;
 
-$count_result = mysql_query(
-    "SELECT COUNT(*) AS total FROM zetyx_member_table WHERE rankpoint > 0",
-    $connect
-);
-if (!$count_result) {
-    slot_fail_database();
-}
-$count_row = mysql_fetch_assoc($count_result);
-$total_rows = (int)$count_row['total'];
+$count_row = slot_db_one('SELECT COUNT(*) AS total FROM zetyx_member_table WHERE rankpoint > 0');
+$total_rows = (int)($count_row['total'] ?? 0);
 $total_pages = max(1, (int)ceil($total_rows / $per_page));
 $page = min($page, $total_pages);
 $offset = ($page - 1) * $per_page;
@@ -35,10 +24,7 @@ $list_sql = "SELECT no, user_id, name, nick_name, rankpoint, gamepoint,
               ORDER BY rankpoint DESC, allseven DESC, allitemh DESC,
                        alliteml DESC, crossseven DESC, no ASC
               LIMIT $offset, $per_page";
-$list_result = mysql_query($list_sql, $connect);
-if (!$list_result) {
-    slot_fail_database();
-}
+$ranking_rows = slot_db_all($list_sql);
 
 function ranking_escape($value): string
 {
@@ -118,7 +104,7 @@ tbody tr:nth-child(-n+3) td:first-child { font-weight: 700; color: #b45309; }
         </tr>
       </thead>
       <tbody>
-<?php $rank = $offset + 1; while ($row = mysql_fetch_assoc($list_result)): ?>
+<?php $rank = $offset + 1; foreach ($ranking_rows as $row): ?>
         <tr>
           <td><?=ranking_escape($rank++)?></td>
           <td class="member-name"><?=ranking_escape(ranking_display_name($row))?></td>
@@ -128,7 +114,7 @@ tbody tr:nth-child(-n+3) td:first-child { font-weight: 700; color: #b45309; }
           <td><?=ranking_escape((int)$row['alliteml'])?></td>
           <td><?=ranking_escape((int)$row['crossseven'])?></td>
         </tr>
-<?php endwhile; ?>
+<?php endforeach; ?>
       </tbody>
     </table>
     <nav class="pagination" aria-label="랭킹 페이지 이동">

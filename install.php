@@ -1,132 +1,74 @@
 <?php
-require_once __DIR__ . "/zbpath.php";
-require_once $_zb_path . "_head.php";
-require_once __DIR__ . "/security.php";
+require_once __DIR__ . '/zbpath.php';
+require_once $_zb_path . '_head.php';
+require_once __DIR__ . '/security.php';
 slot_require_login();
-if (empty($member["is_admin"]) || (string)$member["is_admin"] !== "1") { http_response_code(403); exit("Admin only."); }
-$act = isset($_POST["act"]) ? (string)$_POST["act"] : "";
-if ($_SERVER["REQUEST_METHOD"] === "POST") { slot_require_csrf(); }
+if (empty($member['is_admin']) || (string)$member['is_admin'] !== '1') {
+    http_response_code(403);
+    exit('Admin only.');
+}
+
+$action = (string)($_POST['action'] ?? '');
+$message = '';
+$error = '';
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    slot_require_csrf();
+    try {
+        if ($action === 'install') {
+            foreach (['install.sql', 'ranking.sql', 'event.sql', 'point.sql'] as $file) {
+                slot_db_exec_script(__DIR__ . '/' . $file);
+            }
+            $message = 'ìŠ¬ë¡¯Â·ë­í‚¹Â·ì´ë²¤íŠ¸Â·í¬ì¸íŠ¸ í…Œì´ë¸” ì„¤ì¹˜ê°€ ì™„ë£Œë˜ì—ˆìŠµë‹ˆë‹¤.';
+        } elseif ($action === 'uninstall') {
+            slot_db_exec_script(__DIR__ . '/uninstall.sql');
+            slot_db()->exec('DROP TABLE IF EXISTS slot_point_ledger, slot_daily_point_claims, slot_events');
+            $message = 'ìŠ¬ë¡¯ í™•ì¥ í…Œì´ë¸” ì‚­ì œê°€ ì™„ë£Œë˜ì—ˆìŠµë‹ˆë‹¤.';
+        } else {
+            $error = 'ì§€ì›í•˜ì§€ ì•ŠëŠ” ì‘ì—…ì…ë‹ˆë‹¤.';
+        }
+    } catch (Throwable $e) {
+        error_log('slot install operation failed: ' . $e->getMessage());
+        $error = 'DB ì‘ì—…ì— ì‹¤íŒ¨í–ˆìŠµë‹ˆë‹¤. ì„œë²„ ë¡œê·¸ë¥¼ í™•ì¸í•˜ì„¸ìš”.';
+    }
+}
 ?>
-
-<html>
-
+<!doctype html>
+<html lang="ko">
 <head>
-<title>ÀÎµğ½½·Ô ¼³Ä¡</title>
-<script>
-<!--
-function Move(value)
-{
-	if(value == "uninstall")
-	{
-		if(confirm("¼³Ä¡µÈ ÄÃ·³ÀÌ ¸ğµÎ Á¦°ÅµË´Ï´Ù. °è¼ÓÇÏ½Ã°Ú½À´Ï±î?") == false)
-	  		return false;
-	}
-	menu.act.value = value;
-	menu.submit();
-}
-//-->
-</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ìŠ¬ë¡¯ DB ì„¤ì¹˜</title>
+<style>
+body { margin: 0; background: #f8fafc; color: #1f2937; font-family: Arial, sans-serif; }
+.wrap { width: min(520px, calc(100% - 32px)); margin: 48px auto; }
+.card { padding: 24px; background: #fff; border: 1px solid #e5e7eb; border-radius: 14px; box-shadow: 0 8px 24px rgba(15,23,42,.06); }
+.notice, .error { margin-bottom: 16px; padding: 12px; border-radius: 8px; }
+.notice { background: #ecfdf5; color: #166534; }
+.error { background: #fef2f2; color: #991b1b; }
+button { margin: 6px 6px 0 0; padding: 10px 16px; border: 0; border-radius: 8px; color: #fff; background: #7c3aed; cursor: pointer; font-weight: 700; }
+button.danger { background: #b91c1c; }
+small { color: #64748b; }
+</style>
 </head>
-
-<body bgcolor="white" text="black" link="blue" vlink="purple" alink="red">
-<form name="menu" method="post" action="<?=htmlspecialchars($_SERVER["PHP_SELF"] ?? "", ENT_QUOTES, "UTF-8")?>">
-<input type="hidden" name="csrf_token" value="<?=htmlspecialchars(slot_csrf_token(), ENT_QUOTES, "UTF-8")?>">
-<input type="hidden" name="act">
-<table style="border-collapse:collapse;" align="center" cellspacing="0" width="302">
-    <tr>
-        <td width="298" height="30" bgcolor="#FFF3F3" style="border-top-width:2; border-right-width:1; border-bottom-width:1; border-left-width:1; border-top-color:rgb(249,157,157); border-right-color:rgb(153,153,153); border-bottom-color:rgb(153,153,153); border-left-color:rgb(153,153,153); border-style:solid;">
-            
-            <p align="center"><span style="font-size:9pt;"><font color="#666666">ÀÎµğ½½·Ô 
-            °ü¸®ÀÚ ¸ğµå </font></span></p>
-            
-        </td>
-    </tr>
-    
-<?php
-if(!$act) 
-{
-?>
-    <tr>
-        <td width="298" height="100" style="border-top-width:1; border-right-width:1; border-bottom-width:2; border-left-width:1; border-top-color:rgb(153,153,153); border-right-color:rgb(153,153,153); border-bottom-color:rgb(249,157,157); border-left-color:rgb(153,153,153); border-style:solid;">
-            <p align="center"><span style="font-size:9pt;cursor:hand;" onclick=Move('install');><font color="#666666">[ 
-            ¼³Ä¡ÇÏ±â ]</font></span></p>
-            <p align="center"><span style="font-size:9pt;cursor:hand;" onclick=Move('uninstall');><font color="#666666">[ 
-            »èÁ¦ÇÏ±â ]</font></span></p>
-        </td>
-    </tr>
-<?php
-}
-
-elseif($act == "install")
-{
-	$table = array("install");
-
-	echo "<tr><td width='100%' style='border-top-width:1; border-right-width:1; border-bottom-width:2; border-left-width:1; border-top-color:rgb(153,153,153); border-right-color:rgb(153,153,153); border-bottom-color:rgb(249,157,157); border-left-color:rgb(153,153,153); border-style:solid;' align='center'>";
-	
-	for($i=0; $i<count($table); $i++)
-		if(!file_exists($table[$i].".sql"))
-		{
-		 	echo "install.sql ÆÄÀÏÀÌ Á¸ÀçÇÏÁö ¾Ê½À´Ï´Ù.";
-			exit;
-		}
-
-	echo "<p> ¸â¹öÅ×ÀÌºíÀ» ¼öÁ¤ÇÕ´Ï´Ù.</p>";
-
-	
-	for($j=0; $j<count($table); $j++)
-	{
-		$data = file($table[$j].".sql");
-		
-		echo "ÄÃ·³ º¯°æ ÁßÀÔ´Ï´Ù.";
-	
-
-		$i = 0;
-		
-		while($i < count($data))
-			mysql_query($data[$i++]) or slot_fail_database();
-		
-	}
-		
-	echo "<p>¼º°øÀûÀ¸·Î ¼³Ä¡ÇÏ¿´½À´Ï´Ù.</p>";
-	echo "<br/>";
-	echo "</td></tr>";
-}
-elseif($act == "uninstall")
-{
-	$table = array("uninstall");
-	
-	echo "<tr><td width='100%' style='border-top-width:1; border-right-width:1; border-bottom-width:2; border-left-width:1; border-top-color:rgb(153,153,153); border-right-color:rgb(153,153,153); border-bottom-color:rgb(249,157,157); border-left-color:rgb(153,153,153); border-style:solid;' align='center'>";
-
-	for($i=0; $i<count($table); $i++)
-		if(!file_exists($table[$i].".sql"))
-		{
-		 	echo "uninstall.sql ÆÄÀÏÀÌ Á¸ÀçÇÏÁö ¾Ê½À´Ï´Ù.";
-			exit;
-		}
-
-	echo "<p> ¸â¹öÅ×ÀÌºíÀ» ¼öÁ¤ÇÕ´Ï´Ù.</p>";
-
-	
-	for($j=0; $j<count($table); $j++)
-	{
-		$data = file($table[$j].".sql");
-		
-		echo "ÄÃ·³ Á¦°Å ÁßÀÔ´Ï´Ù.";
-	
-
-		$i = 0;
-		
-		while($i < count($data))
-			mysql_query($data[$i++]) or slot_fail_database();
-		
-	}
-	echo "<p>¼º°øÀûÀ¸·Î »èÁ¦ÇÏ¿´½À´Ï´Ù.</p>";
-	echo "<br/>";
-	echo "</td></tr>";
-}
-?>
-</table>
-</form>
+<body>
+<main class="wrap">
+  <section class="card">
+    <h1>ìŠ¬ë¡¯ DB ê´€ë¦¬</h1>
+<?php if ($message !== ''): ?><div class="notice"><?=htmlspecialchars($message, ENT_QUOTES, 'UTF-8')?></div><?php endif; ?>
+<?php if ($error !== ''): ?><div class="error"><?=htmlspecialchars($error, ENT_QUOTES, 'UTF-8')?></div><?php endif; ?>
+    <p><small>ê·¸ëˆ„ë³´ë“œ7 ìš´ì˜ ì„œë²„ì—ì„œëŠ” ì„¤ì¹˜ê°€ ëë‚œ ë’¤ ì´ íŒŒì¼ì˜ ì›¹ ì ‘ê·¼ì„ ì°¨ë‹¨í•˜ê±°ë‚˜ ì‚­ì œí•˜ì„¸ìš”.</small></p>
+    <form method="post" action="install.php" onsubmit="return confirm(this.dataset.action === 'uninstall' ? 'ì •ë§ ì‚­ì œí•˜ì‹œê² ìŠµë‹ˆê¹Œ?' : 'ì„¤ì¹˜í•˜ì‹œê² ìŠµë‹ˆê¹Œ?');">
+      <input type="hidden" name="csrf_token" value="<?=htmlspecialchars(slot_csrf_token(), ENT_QUOTES, 'UTF-8')?>">
+      <input type="hidden" name="action" value="">
+      <button type="submit" class="install" data-action="install">ì„¤ì¹˜í•˜ê¸°</button>
+      <button type="submit" class="danger" data-action="uninstall">ì‚­ì œí•˜ê¸°</button>
+    </form>
+  </section>
+</main>
+<script>
+document.querySelectorAll('button[data-action]').forEach(function (button) {
+  button.addEventListener('click', function () { this.form.elements.action.value = this.dataset.action; this.form.dataset.action = this.dataset.action; });
+});
+</script>
 </body>
-
 </html>

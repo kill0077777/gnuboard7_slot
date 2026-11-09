@@ -3,10 +3,6 @@ require_once __DIR__ . '/zbpath.php';
 require_once $_zb_path . '_head.php';
 require_once __DIR__ . '/security.php';
 
-if (!isset($connect)) {
-    http_response_code(500);
-    exit('Database connection is unavailable.');
-}
 
 function event_escape($value): string
 {
@@ -40,16 +36,13 @@ $event_id = max(0, (int)$event_id);
 $now = date('Y-m-d H:i:s');
 
 if ($event_id > 0) {
-    $detail_sql = "SELECT event_id, title, content, image_path, start_at, end_at, created_at
-                     FROM slot_events
-                    WHERE event_id = $event_id
-                      AND is_visible = 1
-                    LIMIT 1";
-    $detail_result = mysql_query($detail_sql, $connect);
-    if (!$detail_result) {
-        slot_fail_database();
-    }
-    $event = mysql_fetch_assoc($detail_result);
+    $event = slot_db_one(
+        'SELECT event_id, title, content, image_path, start_at, end_at, created_at
+           FROM slot_events
+          WHERE event_id = :event_id AND is_visible = 1
+          LIMIT 1',
+        [':event_id' => $event_id]
+    );
     if (!$event) {
         http_response_code(404);
         exit('Event not found.');
@@ -62,15 +55,8 @@ if ($event_id > 0) {
         'options' => ['default' => 1, 'min_range' => 1],
     ]);
     $page = max(1, min((int)$page, 100000));
-    $count_result = mysql_query(
-        "SELECT COUNT(*) AS total FROM slot_events WHERE is_visible = 1",
-        $connect
-    );
-    if (!$count_result) {
-        slot_fail_database();
-    }
-    $count_row = mysql_fetch_assoc($count_result);
-    $total_rows = (int)$count_row['total'];
+    $count_row = slot_db_one('SELECT COUNT(*) AS total FROM slot_events WHERE is_visible = 1');
+    $total_rows = (int)($count_row['total'] ?? 0);
     $total_pages = max(1, (int)ceil($total_rows / $per_page));
     $page = min($page, $total_pages);
     $offset = ($page - 1) * $per_page;
@@ -79,10 +65,7 @@ if ($event_id > 0) {
                   WHERE is_visible = 1
                   ORDER BY start_at DESC, event_id DESC
                   LIMIT $offset, $per_page";
-    $list_result = mysql_query($list_sql, $connect);
-    if (!$list_result) {
-        slot_fail_database();
-    }
+    $event_rows = slot_db_all($list_sql);
 }
 ?>
 <!doctype html>
@@ -144,7 +127,7 @@ h1 { margin: 0 0 18px; font-size: 28px; }
     <div class="empty">등록된 이벤트가 없습니다.</div>
 <?php else: ?>
     <div class="event-list">
-<?php while ($row = mysql_fetch_assoc($list_result)): [$label, $class] = event_status($row['start_at'], $row['end_at'], $now); ?>
+<?php foreach ($event_rows as $row): [$label, $class] = event_status($row['start_at'], $row['end_at'], $now); ?>
       <a class="event-item" href="event.php?id=<?=event_escape((int)$row['event_id'])?>">
         <h2><?=event_escape($row['title'])?></h2>
         <div class="event-meta">
@@ -152,7 +135,7 @@ h1 { margin: 0 0 18px; font-size: 28px; }
           <span><?=event_escape($row['start_at'])?> ~ <?=event_escape($row['end_at'])?></span>
         </div>
       </a>
-<?php endwhile; ?>
+<?php endforeach; ?>
     </div>
     <nav class="pagination" aria-label="이벤트 페이지 이동">
 <?php for ($p = max(1, $page - 3); $p <= min($total_pages, $page + 3); $p++): ?>

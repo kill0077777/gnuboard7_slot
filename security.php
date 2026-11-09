@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+require_once __DIR__ . '/db.php';
 
 if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start();
@@ -49,8 +50,8 @@ function slot_bool_input(string $name): bool
 
 function slot_user_id(): string
 {
-    global $member, $connect;
-    return mysql_real_escape_string((string)$member['user_id'], $connect);
+    global $member;
+    return (string)$member['user_id'];
 }
 
 function slot_fail_database(): void

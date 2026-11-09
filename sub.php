@@ -25,9 +25,8 @@ $alll=0;
 $cro7=0;
 
 // 슬롯 회원 정보
-$sdata_result = mysql_query("select * from zetyx_member_table where user_id='$slot_user_id'", $connect);
-if (!$sdata_result) { slot_fail_database(); }
-$sdata = mysql_fetch_array($sdata_result);
+$sdata = slot_db_one('SELECT * FROM zetyx_member_table WHERE user_id = :user_id LIMIT 1', [':user_id' => $slot_user_id]);
+if ($sdata === null) { slot_fail_database(); }
 
 if($member[no]&&$sdata[bar]>0) // 디비에 남은 바 서비스가 존재할 경우
 {
@@ -66,8 +65,12 @@ $img[8]="images/spin".$num[8].".gif";
 $img[9]="images/spin".$num[9].".gif";
 
 if($member[no]&&$sdata[gamepoint]>=$betmoney&&$betmoney>=20) {
-$debit_sql = "update zetyx_member_table set gamepoint=gamepoint-$betmoney where user_id='$slot_user_id' and gamepoint >= $betmoney";
-if (!mysql_query($debit_sql, $connect) || mysql_affected_rows($connect) !== 1) {
+$debit_count = slot_db_exec(
+    'UPDATE zetyx_member_table SET gamepoint = gamepoint - :betmoney
+      WHERE user_id = :user_id AND gamepoint >= :minimum',
+    [':betmoney' => $betmoney, ':user_id' => $slot_user_id, ':minimum' => $betmoney]
+);
+if ($debit_count !== 1) {
     http_response_code(409);
     exit("Insufficient points or duplicate request.");
 }
@@ -721,40 +724,40 @@ if($bells>0)
 {
 	if($sdata[bell]<=$bells)
 	{
-	 mysql_query("update zetyx_member_table set bellbonus=bellbonus+5 where user_id='$slot_user_id'", $connect) or slot_fail_database();
-	 mysql_query("update zetyx_member_table set bell=bell-$bells+5 where user_id='$slot_user_id'", $connect) or slot_fail_database();
+	 slot_db_exec('UPDATE zetyx_member_table SET bellbonus = bellbonus + 5 WHERE user_id = :user_id', [':user_id' => $slot_user_id]);
+	 slot_db_exec('UPDATE zetyx_member_table SET bell = bell - :bells_sub + 5 WHERE user_id = :user_id AND bell >= :bells_min', [':bells_sub' => $bells, ':user_id' => $slot_user_id, ':bells_min' => $bells]);
 	 echo "<script>top.setBetFalse();</script>";
 	}
 	else
 	{
-	 mysql_query("update zetyx_member_table set bell=bell-$bells where user_id='$slot_user_id'", $connect) or slot_fail_database();
+	 slot_db_exec('UPDATE zetyx_member_table SET bell = bell - :bells_sub WHERE user_id = :user_id AND bell >= :bells_min', [':bells_sub' => $bells, ':user_id' => $slot_user_id, ':bells_min' => $bells]);
 	}
 }
 if($mode!=1 && $bars>0)
 {
-	mysql_query("update zetyx_member_table set bar=bar+$bars where user_id='$slot_user_id'", $connect) or slot_fail_database();
+	slot_db_exec('UPDATE zetyx_member_table SET bar = bar + :bars WHERE user_id = :user_id', [':bars' => $bars, ':user_id' => $slot_user_id]);
 	echo "<script>top.setBetFalse();</script>";
 }
 	
 switch($rankdb)
 {
 	case 1:
-		mysql_query("update zetyx_member_table set allseven=allseven+1, rankpoint=rankpoint+5 where user_id='$slot_user_id'", $connect) or slot_fail_database();
+		slot_db_exec('UPDATE zetyx_member_table SET allseven = allseven + 1, rankpoint = rankpoint + 5 WHERE user_id = :user_id', [':user_id' => $slot_user_id]);
 		echo "<script>top.setRecord(".($sdata[allseven]+1).",".$sdata[allitemh].",".$sdata[alliteml].",".$sdata[crossseven].");</script>";
 		$all7=1;
 		break;
 	case 2:
-		mysql_query("update zetyx_member_table set allitemh=allitemh+1, rankpoint=rankpoint+3  where user_id='$slot_user_id'", $connect) or slot_fail_database();
+		slot_db_exec('UPDATE zetyx_member_table SET allitemh = allitemh + 1, rankpoint = rankpoint + 3 WHERE user_id = :user_id', [':user_id' => $slot_user_id]);
 		echo "<script>top.setRecord(".$sdata[allseven].",".($sdata[allitemh]+1).",".$sdata[alliteml].",".$sdata[crossseven].");</script>";
 		$allh=1;
 		break;
 	case 3:
-		mysql_query("update zetyx_member_table set alliteml=alliteml+1, rankpoint=rankpoint+1  where user_id='$slot_user_id'", $connect) or slot_fail_database();
+		slot_db_exec('UPDATE zetyx_member_table SET alliteml = alliteml + 1, rankpoint = rankpoint + 1 WHERE user_id = :user_id', [':user_id' => $slot_user_id]);
 		echo "<script>top.setRecord(".$sdata[allseven].",".$sdata[allitemh].",".($sdata[alliteml]+1).",".$sdata[crossseven].");</script>";
 		$alll=1;
 		break;
 	case 4:
-		mysql_query("update zetyx_member_table set crossseven=crossseven+1, rankpoint=rankpoint+1  where user_id='$slot_user_id'", $connect) or slot_fail_database();
+		slot_db_exec('UPDATE zetyx_member_table SET crossseven = crossseven + 1, rankpoint = rankpoint + 1 WHERE user_id = :user_id', [':user_id' => $slot_user_id]);
 		echo "<script>top.setRecord(".$sdata[allseven].",".$sdata[allitemh].",".$sdata[alliteml].",".($sdata[crossseven]+1).");</script>";
 		$cro7=1;
 		break;
@@ -775,7 +778,16 @@ else
 	$gamemsg=$gamemsg+" "+$total_points;
 }	
 
-mysql_query("update zetyx_member_table set gamepoint=gamepoint+$total_points,box1=$num[1],box2=$num[2],box3=$num[3],box4=$num[4],box5=$num[5],box6=$num[6],box7=$num[7],box8=$num[8],box9=$num[9] where user_id='$slot_user_id'", $connect) or slot_fail_database();
+slot_db_exec(
+    'UPDATE zetyx_member_table
+        SET gamepoint = gamepoint + :total_points,
+            box1 = :box1, box2 = :box2, box3 = :box3, box4 = :box4, box5 = :box5,
+            box6 = :box6, box7 = :box7, box8 = :box8, box9 = :box9
+      WHERE user_id = :user_id',
+    [':total_points' => $total_points, ':box1' => (int)$num[1], ':box2' => (int)$num[2], ':box3' => (int)$num[3],
+     ':box4' => (int)$num[4], ':box5' => (int)$num[5], ':box6' => (int)$num[6], ':box7' => (int)$num[7],
+     ':box8' => (int)$num[8], ':box9' => (int)$num[9], ':user_id' => $slot_user_id]
+);
 
 // 화면 스크립트 실행
 echo "<script>setting(".$total_points.");</script>";

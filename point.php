@@ -2,7 +2,6 @@
 require_once __DIR__ . '/zbpath.php';
 require_once $_zb_path . '_head.php';
 require_once __DIR__ . '/security.php';
-
 slot_require_login();
 
 function point_escape($value): string
@@ -16,87 +15,81 @@ function point_fail(string $message, int $status = 400): void
     exit($message);
 }
 
-function point_member_id(string $value): string
-{
-    global $connect;
-    return mysql_real_escape_string($value, $connect);
-}
-
 function point_balance(string $user_id): int
 {
-    global $connect;
-    $result = mysql_query(
-        "SELECT gamepoint FROM zetyx_member_table WHERE user_id='" . point_member_id($user_id) . "' LIMIT 1",
-        $connect
+    $row = slot_db_one(
+        'SELECT gamepoint FROM zetyx_member_table WHERE user_id = :user_id LIMIT 1',
+        [':user_id' => $user_id]
     );
-    if (!$result) {
-        slot_fail_database();
-    }
-    $row = mysql_fetch_assoc($result);
     return $row ? max(0, (int)$row['gamepoint']) : 0;
 }
 
-function point_add_ledger(string $user_id, string $actor_user_id, int $amount, int $balance_after, string $type, string $reference, string $memo): bool
+function point_insert_ledger(PDO $pdo, string $user_id, string $actor_user_id, int $amount, int $balance_after, string $type, string $reference, string $memo): void
 {
-    global $connect;
-    $sql = sprintf(
-        "INSERT INTO slot_point_ledger
+    $statement = $pdo->prepare(
+        'INSERT INTO slot_point_ledger
          (user_id, actor_user_id, amount, balance_after, point_type, reference_key, memo)
-         VALUES ('%s','%s',%d,%d,'%s','%s','%s')",
-        point_member_id($user_id),
-        point_member_id($actor_user_id),
-        $amount,
-        $balance_after,
-        point_member_id($type),
-        point_member_id($reference),
-        point_member_id($memo)
+         VALUES (:user_id, :actor_user_id, :amount, :balance_after, :point_type, :reference_key, :memo)'
     );
-    return (bool)mysql_query($sql, $connect);
+    $statement->execute([
+        ':user_id' => $user_id,
+        ':actor_user_id' => $actor_user_id,
+        ':amount' => $amount,
+        ':balance_after' => $balance_after,
+        ':point_type' => $type,
+        ':reference_key' => $reference,
+        ':memo' => $memo,
+    ]);
+}
+
+function point_run_transaction(callable $callback): void
+{
+    $pdo = slot_db();
+    $pdo->beginTransaction();
+    try {
+        $callback($pdo);
+        $pdo->commit();
+    } catch (Throwable $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        error_log('slot point transaction failed: ' . $e->getMessage());
+        throw new SlotDatabaseException('Point transaction failed.', 0, $e);
+    }
 }
 
 $member_user_id = (string)$member['user_id'];
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     slot_require_csrf();
     $action = (string)($_POST['action'] ?? '');
-    $actor_id = $member_user_id;
 
     if ($action === 'daily_charge') {
         $today = date('Y-m-d');
-        $today_key = point_member_id($today);
-        $user_key = point_member_id($member_user_id);
-        $amount = 50000;
-
-        mysql_query('START TRANSACTION', $connect);
-        $claim = mysql_query(
-            "INSERT INTO slot_daily_point_claims (user_id, claim_date, amount)
-             VALUES ('$user_key', '$today_key', $amount)",
-            $connect
-        );
-        if (!$claim) {
-            mysql_query('ROLLBACK', $connect);
+        try {
+            point_run_transaction(function (PDO $pdo) use ($member_user_id, $today): void {
+                $claim = $pdo->prepare(
+                    'INSERT INTO slot_daily_point_claims (user_id, claim_date, amount)
+                     VALUES (:user_id, :claim_date, :amount)'
+                );
+                $claim->execute([':user_id' => $member_user_id, ':claim_date' => $today, ':amount' => 50000]);
+                $locked = $pdo->prepare(
+                    'SELECT gamepoint FROM zetyx_member_table WHERE user_id = :user_id FOR UPDATE'
+                );
+                $locked->execute([':user_id' => $member_user_id]);
+                $row = $locked->fetch();
+                if (!$row) {
+                    throw new RuntimeException('Member account not found.');
+                }
+                $after = max(0, (int)$row['gamepoint']) + 50000;
+                $update = $pdo->prepare(
+                    'UPDATE zetyx_member_table SET gamepoint = :gamepoint WHERE user_id = :user_id'
+                );
+                $update->execute([':gamepoint' => $after, ':user_id' => $member_user_id]);
+                point_insert_ledger($pdo, $member_user_id, $member_user_id, 50000, $after, 'daily_charge', 'daily:' . $member_user_id . ':' . $today, '1일 무료 충전');
+            });
+        } catch (Throwable $e) {
             point_fail('오늘 충전은 이미 완료되었거나 처리할 수 없습니다.', 409);
         }
-        $locked = mysql_query(
-            "SELECT gamepoint FROM zetyx_member_table WHERE user_id='$user_key' FOR UPDATE",
-            $connect
-        );
-        $row = $locked ? mysql_fetch_assoc($locked) : false;
-        if (!$row) {
-            mysql_query('ROLLBACK', $connect);
-            point_fail('회원 계정을 찾을 수 없습니다.', 404);
-        }
-        $after = max(0, (int)$row['gamepoint']) + $amount;
-        $updated = mysql_query(
-            "UPDATE zetyx_member_table SET gamepoint=$after WHERE user_id='$user_key'",
-            $connect
-        );
-        $reference = 'daily:' . $member_user_id . ':' . $today;
-        $logged = $updated && point_add_ledger($member_user_id, $actor_id, $amount, $after, 'daily_charge', $reference, '1일 무료 충전');
-        if (!$logged) {
-            mysql_query('ROLLBACK', $connect);
-            point_fail('충전 기록 저장에 실패했습니다.', 500);
-        }
-        mysql_query('COMMIT', $connect);
         header('Location: point.php?charged=1');
         exit;
     }
@@ -117,30 +110,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (strlen($memo) > 255) {
             point_fail('메모는 255자 이내로 입력하세요.');
         }
-        $target_key = point_member_id($target_user_id);
-        mysql_query('START TRANSACTION', $connect);
-        $locked = mysql_query(
-            "SELECT gamepoint FROM zetyx_member_table WHERE user_id='$target_key' FOR UPDATE",
-            $connect
-        );
-        $row = $locked ? mysql_fetch_assoc($locked) : false;
-        if (!$row) {
-            mysql_query('ROLLBACK', $connect);
-            point_fail('대상 회원을 찾을 수 없습니다.', 404);
+        try {
+            point_run_transaction(function (PDO $pdo) use ($target_user_id, $member_user_id, $amount, $memo, $action): void {
+                $locked = $pdo->prepare(
+                    'SELECT gamepoint FROM zetyx_member_table WHERE user_id = :user_id FOR UPDATE'
+                );
+                $locked->execute([':user_id' => $target_user_id]);
+                $row = $locked->fetch();
+                if (!$row) {
+                    throw new RuntimeException('Target member not found.');
+                }
+                $after = max(0, (int)$row['gamepoint']) + (int)$amount;
+                $update = $pdo->prepare(
+                    'UPDATE zetyx_member_table SET gamepoint = :gamepoint WHERE user_id = :user_id'
+                );
+                $update->execute([':gamepoint' => $after, ':user_id' => $target_user_id]);
+                $type = $action === 'admin_gift' ? 'admin_gift' : 'admin_charge';
+                $reference = 'admin:' . $member_user_id . ':' . bin2hex(random_bytes(12));
+                point_insert_ledger($pdo, $target_user_id, $member_user_id, (int)$amount, $after, $type, $reference, $memo);
+            });
+        } catch (Throwable $e) {
+            point_fail('포인트 처리에 실패했습니다.', 500);
         }
-        $after = max(0, (int)$row['gamepoint']) + (int)$amount;
-        $updated = mysql_query(
-            "UPDATE zetyx_member_table SET gamepoint=$after WHERE user_id='$target_key'",
-            $connect
-        );
-        $reference = 'admin:' . $member_user_id . ':' . bin2hex(random_bytes(12));
-        $type = $action === 'admin_gift' ? 'admin_gift' : 'admin_charge';
-        $logged = $updated && point_add_ledger($target_user_id, $actor_id, (int)$amount, $after, $type, $reference, $memo);
-        if (!$logged) {
-            mysql_query('ROLLBACK', $connect);
-            point_fail('포인트 기록 저장에 실패했습니다.', 500);
-        }
-        mysql_query('COMMIT', $connect);
         header('Location: point.php?admin_done=1');
         exit;
     }

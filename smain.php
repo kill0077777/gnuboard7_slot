@@ -5,9 +5,8 @@ require_once __DIR__ . "/security.php";
 slot_require_login();
 $slot_csrf_token = slot_csrf_token();
 $slot_user_id = slot_user_id();
-$selectdb = "select * from zetyx_member_table where user_id = '$slot_user_id'";
-$resultdb = mysql_query($selectdb, $connect) or slot_fail_database();
-$datadb=mysql_fetch_array($resultdb);
+$datadb = slot_db_one('SELECT * FROM zetyx_member_table WHERE user_id = :user_id LIMIT 1', [':user_id' => $slot_user_id]);
+if ($datadb === null) { slot_fail_database(); }
 ?>
 
 <html>
