@@ -13,6 +13,15 @@ function event_escape($value): string
     return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
 }
 
+function event_safe_image_path(string $path): string
+{
+    $path = trim($path);
+    if ($path === '' || !preg_match('~^/?(?:images|uploads)/[A-Za-z0-9._/-]+$~', $path)) {
+        return '';
+    }
+    return $path;
+}
+
 function event_status(string $start_at, string $end_at, string $now): array
 {
     if ($now < $start_at) {
@@ -46,6 +55,7 @@ if ($event_id > 0) {
         exit('Event not found.');
     }
     [$status_label, $status_class] = event_status($event['start_at'], $event['end_at'], $now);
+    $event_image = event_safe_image_path((string)$event['image_path']);
 } else {
     $per_page = 10;
     $page = filter_input(INPUT_GET, 'page', FILTER_VALIDATE_INT, [
@@ -120,8 +130,8 @@ h1 { margin: 0 0 18px; font-size: 28px; }
       <span class="badge <?=event_escape($status_class)?>"><?=event_escape($status_label)?></span>
     </header>
     <div class="event-content">
-<?php if (!empty($event['image_path'])): ?>
-      <img class="event-image" src="<?=event_escape($event['image_path'])?>" alt="<?=event_escape($event['title'])?>">
+<?php if ($event_image !== ''): ?>
+      <img class="event-image" src="<?=event_escape($event_image)?>" alt="<?=event_escape($event['title'])?>">
 <?php endif; ?>
       <div><?=event_escape($event['content'])?></div>
       <p class="event-meta">기간: <?=event_escape($event['start_at'])?> ~ <?=event_escape($event['end_at'])?></p>

@@ -66,5 +66,5 @@ $allbell=0;		/* 올잡종 */
 $allbar=0;		/* 올잡바 */
 $bells=0;
 
-@mysql_query("update zetyx_member_table set bar=bar-1 where user_id='$slot_user_id'",$connect) or error(mysql_error());
+mysql_query("update zetyx_member_table set bar=bar-1 where user_id='$slot_user_id'",$connect) or slot_fail_database();
 ?>

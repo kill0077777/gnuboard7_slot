@@ -6,7 +6,7 @@ slot_require_login();
 $slot_csrf_token = slot_csrf_token();
 $slot_user_id = slot_user_id();
 $selectdb = "select * from zetyx_member_table where user_id = '$slot_user_id'";
-$resultdb = @mysql_query($selectdb, $connect) or die(mysql_error());
+$resultdb = mysql_query($selectdb, $connect) or slot_fail_database();
 $datadb=mysql_fetch_array($resultdb);
 ?>
 
@@ -173,7 +173,14 @@ function replay()	// 새게임 시작
 	{
 		isPlay=true;
 
-		parent.win.location="sub.php?csrf_token=<?=rawurlencode($slot_csrf_token)?>&h1="+hold1+"&h2="+hold2+"&h3="+hold3+"&holds="+holds+"&betmoney="+betmoney;
+		var form=document.createElement("form");
+        form.method="post";
+        form.action="sub.php";
+        form.target="win";
+        [["csrf_token","<?=htmlspecialchars($slot_csrf_token, ENT_QUOTES, "UTF-8")?>"],["h1",hold1],["h2",hold2],["h3",hold3],["holds",holds],["betmoney",betmoney]].forEach(function(pair){var input=document.createElement("input"); input.type="hidden"; input.name=pair[0]; input.value=pair[1]; form.appendChild(input);});
+        document.body.appendChild(form);
+        form.submit();
+        form.remove();
 	}
 	hold1=false;
 	hold2=false;

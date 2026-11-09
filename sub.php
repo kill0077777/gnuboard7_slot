@@ -74,19 +74,19 @@ if (!mysql_query($debit_sql, $connect) || mysql_affected_rows($connect) !== 1) {
 
 if($holds>0)
 {
-	if($h1=="true")
+	if($h1)
 	{
 		$num[1]=$sdata[box1];	$img[1]="images/stop".$num[1].".gif";
 		$num[4]=$sdata[box4];	$img[4]="images/stop".$num[4].".gif";
 		$num[7]=$sdata[box7];	$img[7]="images/stop".$num[7].".gif";
 	}
-	if($h2=="true")
+	if($h2)
 	{
 		$num[2]=$sdata[box2];	$img[2]="images/stop".$num[2].".gif";
 		$num[5]=$sdata[box5];	$img[5]="images/stop".$num[5].".gif";
 		$num[8]=$sdata[box8];	$img[8]="images/stop".$num[8].".gif";
 	}
-	if($h3=="true")
+	if($h3)
 	{
 		$num[3]=$sdata[box3];	$img[3]="images/stop".$num[3].".gif";
 		$num[6]=$sdata[box6];	$img[6]="images/stop".$num[6].".gif";

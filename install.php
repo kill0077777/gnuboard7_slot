@@ -42,7 +42,7 @@ function Move(value)
         </td>
     </tr>
     
-<? 
+<?php
 if(!$act) 
 {
 ?>
@@ -83,7 +83,7 @@ elseif($act == "install")
 		$i = 0;
 		
 		while($i < count($data))
-			mysql_query($data[$i++]) or error(mysql_error());
+			mysql_query($data[$i++]) or slot_fail_database();
 		
 	}
 		
@@ -117,7 +117,7 @@ elseif($act == "uninstall")
 		$i = 0;
 		
 		while($i < count($data))
-			mysql_query($data[$i++]) or error(mysql_error());
+			mysql_query($data[$i++]) or slot_fail_database();
 		
 	}
 	echo "<p>성공적으로 삭제하였습니다.</p>";

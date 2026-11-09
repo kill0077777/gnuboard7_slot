@@ -45,3 +45,7 @@
 - [보안 분석](SECURITY_AUDIT_KO.md)
 - [이벤트게시판 안내](EVENT_BOARD_KO.md)
 - [통합 포인트 안내](POINT_SYSTEM_KO.md)
+
+## 최근 PHP 보안 수정
+
+GET 기반 게임 실행을 POST로 전환하고 CSRF·입력 검증·SQL 오류 노출·외부 이벤트 이미지 경로·구형 중복 진입 파일을 추가 점검했습니다. 상세 내용은 [PHP 보안 수정 내역](SECURITY_FIXES_KO.md)을 확인하세요.

@@ -24,7 +24,7 @@ function slot_csrf_token(): string
 
 function slot_require_csrf(): void
 {
-    $token = (string)($_REQUEST['csrf_token'] ?? '');
+    $token = (string)($_POST['csrf_token'] ?? '');
     $known = (string)($_SESSION['slot_csrf'] ?? '');
     if ($known === '' || $token === '' || !hash_equals($known, $token)) {
         http_response_code(403);
@@ -34,7 +34,7 @@ function slot_require_csrf(): void
 
 function slot_int_input(string $name, int $min, int $max, int $default = 0): int
 {
-    $raw = $_REQUEST[$name] ?? null;
+    $raw = $_POST[$name] ?? null;
     if (is_array($raw) || $raw === null || filter_var($raw, FILTER_VALIDATE_INT) === false) {
         return $default;
     }
@@ -43,7 +43,7 @@ function slot_int_input(string $name, int $min, int $max, int $default = 0): int
 
 function slot_bool_input(string $name): bool
 {
-    $raw = $_REQUEST[$name] ?? '';
+    $raw = $_POST[$name] ?? '';
     return $raw === true || $raw === 1 || $raw === '1' || $raw === 'true';
 }
 
