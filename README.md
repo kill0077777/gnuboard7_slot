@@ -54,3 +54,11 @@ GET 기반 게임 실행을 POST로 전환하고 CSRF·입력 검증·SQL 오류
 ## DB 계층
 
 모든 PHP 쿼리는 `db.php`의 PDO 계층을 사용합니다. 그누보드 설정 상수(`G5_MYSQL_HOST`, `G5_MYSQL_USER`, `G5_MYSQL_PASSWORD`, `G5_MYSQL_DB`)를 사용할 수 있으며, 독립 실행 시에는 `SLOT_DB_DSN`, `SLOT_DB_USER`, `SLOT_DB_PASSWORD` 또는 `SLOT_DB_HOST`, `SLOT_DB_PORT`, `SLOT_DB_NAME` 환경변수를 설정합니다.
+
+## 관리자 설정 및 포인트 관리
+
+관리자 전용 `slot_admin.php`에서 슬롯 베팅 한도, 잭팟 범위, 2배·3배·5배 확률, 전체 배당률을 설정할 수 있습니다. 확률은 bp 단위(`10000bp = 100%`)이며, 설정값은 `slot_game_settings` 테이블에 저장됩니다.
+
+같은 화면에서 회원별 포인트 충전·선물, 잔액 조회, 포인트 원장과 처리자·메모 내역 조회를 수행할 수 있습니다. 자세한 내용은 [관리자 기능 안내](ADMIN_SETTINGS_KO.md)를 확인하세요.
+
+운영 DB에 적용하기 전에는 백업·롤백 계획과 테스트 회원을 준비하고, 실회원의 포인트를 변경하지 않는 최종 배포 테스트를 진행해야 합니다.

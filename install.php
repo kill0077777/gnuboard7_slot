@@ -15,13 +15,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     slot_require_csrf();
     try {
         if ($action === 'install') {
-            foreach (['install.sql', 'ranking.sql', 'event.sql', 'point.sql'] as $file) {
+            foreach (['install.sql', 'ranking.sql', 'event.sql', 'point.sql', 'slot_settings.sql'] as $file) {
                 slot_db_exec_script(__DIR__ . '/' . $file);
             }
             $message = '슬롯·랭킹·이벤트·포인트 테이블 설치가 완료되었습니다.';
         } elseif ($action === 'uninstall') {
             slot_db_exec_script(__DIR__ . '/uninstall.sql');
-            slot_db()->exec('DROP TABLE IF EXISTS slot_point_ledger, slot_daily_point_claims, slot_events');
+            slot_db()->exec('DROP TABLE IF EXISTS slot_point_ledger, slot_daily_point_claims, slot_events, slot_game_settings');
             $message = '슬롯 확장 테이블 삭제가 완료되었습니다.';
         } else {
             $error = '지원하지 않는 작업입니다.';

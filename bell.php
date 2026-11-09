@@ -33,7 +33,7 @@ $number[9]=0;
 
 
 
-$jackpot=random_int(3000, 18000);
+$jackpot=slot_game_jackpot();
 
 $cross=random_int(2000, 2004);
 
@@ -44,14 +44,7 @@ $allmode=100;		// 올그림 여부
 $crossmode=0;		// 세븐 서비스 모드
 
 // 더블배당 찬스
-$double=random_int(0, 80);
-
-$doublepoint=1;
-
-if($double<1) $doublepoint=5;
-else if($double<2) $doublepoint=3;
-else if($double<4) $doublepoint=2;
-else $doublepoint=1;
+$doublepoint=slot_game_double_multiplier();
 
 
 /* 올그림 확률 생성 */

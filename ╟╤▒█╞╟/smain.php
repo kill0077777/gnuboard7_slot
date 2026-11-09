@@ -5,6 +5,7 @@ require_once __DIR__ . "/security.php";
 slot_require_login();
 $slot_csrf_token = slot_csrf_token();
 $slot_user_id = slot_user_id();
+$slot_bet_max = slot_setting_int('bet_max', 300, 20, 100000);
 $datadb = slot_db_one('SELECT * FROM zetyx_member_table WHERE user_id = :user_id LIMIT 1', [':user_id' => $slot_user_id]);
 if ($datadb === null) { slot_fail_database(); }
 ?>
@@ -49,7 +50,7 @@ function upmoney()	// 배팅 올리기
 	
 	if(isBet)
 	{
-		if(betmoney<300)
+		if(betmoney<<?=$slot_bet_max?>)
 			betmoney=betmoney+20;
 		document.getElementById('betmoney').value=betmoney;
 	}

@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__ . '/db.php';
+require_once __DIR__ . '/slot_config.php';
 
 if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start();

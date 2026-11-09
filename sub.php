@@ -5,7 +5,9 @@ require_once __DIR__ . "/security.php";
 slot_require_login();
 slot_require_csrf();
 $slot_user_id = slot_user_id();
-$betmoney = slot_int_input("betmoney", 0, 300, 0);
+$bet_max = slot_setting_int('bet_max', 300, 20, 100000);
+$bet_min = slot_setting_int('bet_min', 20, 1, $bet_max);
+$betmoney = slot_int_input('betmoney', 0, $bet_max, 0);
 $h1 = slot_bool_input("h1");
 $h2 = slot_bool_input("h2");
 $h3 = slot_bool_input("h3");
@@ -64,7 +66,7 @@ $img[7]="images/spin".$num[7].".gif";
 $img[8]="images/spin".$num[8].".gif";
 $img[9]="images/spin".$num[9].".gif";
 
-if($member['no']&&$sdata['gamepoint']>=$betmoney&&$betmoney>=20) {
+if($member['no']&&$sdata['gamepoint']>=$betmoney&&$betmoney>=$bet_min) {
 $debit_count = slot_db_exec(
     'UPDATE zetyx_member_table SET gamepoint = gamepoint - :betmoney
       WHERE user_id = :user_id AND gamepoint >= :minimum',
@@ -774,6 +776,8 @@ if($total_points==0)
 else
 {
 	$total_points=$total_points*$doublepoint;
+    $payout_multiplier_bp = slot_setting_int('payout_multiplier_bp', 10000, 0, 100000);
+    $total_points = (int)floor($total_points * $payout_multiplier_bp / 10000);
 	echo "<script>gamemsg='".$gamemsg."'+' ".$total_points." P';</script>";
 	$gamemsg = $gamemsg . " " . $total_points;
 }	

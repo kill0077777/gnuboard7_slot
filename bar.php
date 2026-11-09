@@ -15,7 +15,7 @@ $gamemsg="";
 $allmode=100;		// 올그림 여부
 
 // 잭팟점수 생성
-$jackpot=random_int(3000, 18000);
+$jackpot=slot_game_jackpot();
 
 // 십자세븐 확률
 $cross=20000;
@@ -27,14 +27,7 @@ $allrand=20000;
 $all=20000;
 
 // 더블배당 찬스
-$double=random_int(0, 80);
-
-$doublepoint=1;
-
-if($double<1) $doublepoint=5;
-else if($double<2) $doublepoint=3;
-else if($double<4) $doublepoint=2;
-else $doublepoint=1;
+$doublepoint=slot_game_double_multiplier();
 
 /* 기본 번호 생성 */
 for($i=1;$i<10;$i++)
