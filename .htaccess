@@ -1,0 +1,19 @@
+# 민감한 소스·설정·문서의 직접 다운로드 차단
+<FilesMatch "(^|\.)((env|git|htaccess)|sql|md|manifest|log)$">
+    Require all denied
+</FilesMatch>
+
+# 설치/삭제 엔드포인트는 배포 후 삭제 또는 별도 관리자 경로로 이동하세요.
+# 운영 환경에서는 다음 지시어를 활성화해 웹 접근을 차단합니다.
+# <Files "install.php">
+#     Require all denied
+# </Files>
+
+Options -Indexes
+
+# Apache에서 PHP CGI 인자 주입 및 위험한 CGI 경로 사용을 줄입니다.
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>

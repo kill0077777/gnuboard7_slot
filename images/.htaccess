@@ -1,0 +1,9 @@
+# 이미지 디렉터리에서는 PHP/CGI 실행을 허용하지 않습니다.
+Options -ExecCGI -Indexes
+<FilesMatch "\.(php|phtml|pht|phar|cgi|pl|py|sh)$">
+    Require all denied
+</FilesMatch>
+<IfModule mod_mime.c>
+    RemoveHandler .php .phtml .pht .phar .cgi .pl .py .sh
+    RemoveType .php .phtml .pht .phar .cgi .pl .py .sh
+</IfModule>

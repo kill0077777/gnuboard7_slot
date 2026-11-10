@@ -3,7 +3,21 @@ declare(strict_types=1);
 require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/slot_config.php';
 
+if (!headers_sent()) {
+    header('X-Content-Type-Options: nosniff');
+    header('X-Frame-Options: SAMEORIGIN');
+    header('Referrer-Policy: strict-origin-when-cross-origin');
+    header('Permissions-Policy: camera=(), microphone=(), geolocation=()');
+    if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
+        header('Strict-Transport-Security: max-age=31536000; includeSubDomains');
+    }
+}
 if (session_status() !== PHP_SESSION_ACTIVE) {
+    session_set_cookie_params([
+        'httponly' => true,
+        'secure' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
+        'samesite' => 'Lax',
+    ]);
     session_start();
 }
 
